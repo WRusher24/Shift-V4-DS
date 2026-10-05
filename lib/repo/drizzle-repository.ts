@@ -645,16 +645,16 @@ export class DrizzleRepository implements Repository {
     return rows.map(toRace);
   }
 
-  /**
-   * Promotes one race to primary and demotes every other in a single atomic
-   * statement, so the partial unique index can never be violated even
-   * transiently.
+ /**
+   * Promotes one race to primary and demotes every other in a transaction.
    */
   async setPrimaryRace(id: string): Promise<Race | null> {
     try {
       const db = getDb();
       await db.transaction(async (tx) => {
+        // Demote all races first
         await tx.update(races).set({ isPrimary: false });
+        // Promote the target race
         await tx.update(races).set({ isPrimary: true }).where(eq(races.id, id));
       });
       return this.getRaceById(id);
