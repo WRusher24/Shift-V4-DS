@@ -1,0 +1,344 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Shift — bright industrial theme
+   --------------------------------------------------------------------------
+   Design intent: crisp white/light-gray surfaces, high-contrast dark ink,
+   corporate blue chrome, electric green for anything "live", safety amber for
+   anything paused. Explicitly no dark backgrounds.
+
+   RTL: the document is authored with `dir="rtl"`. Every layout rule below uses
+   logical properties (inline-start / inline-end, margin-inline, padding-inline)
+   rather than physical left/right so the layout can never break in RTL.
+   ========================================================================== */
+
+:root {
+  --surface: #ffffff;
+  --surface-muted: #f4f6f9;
+  --surface-sunken: #e9edf3;
+  --line: #d7dee8;
+  --ink: #0f172a;
+  --ink-soft: #334155;
+  --ink-muted: #64748b;
+  --brand: #2563eb;
+  --live: #10b981;
+  --safety: #f59e0b;
+  --danger: #dc2626;
+  --radius: 14px;
+}
+
+* {
+  /* Logical border defaults keep RTL borders consistent. */
+  border-color: var(--line);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+html {
+  /* The whole app is Hebrew-first. */
+  direction: rtl;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--surface-muted);
+  color: var(--ink);
+  font-family: Heebo, Assistant, Rubik, 'Segoe UI', 'Arial Hebrew', 'Noto Sans Hebrew', system-ui, sans-serif;
+  font-feature-settings: 'kern' 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* --------------------------------------------------------------------------
+   Numerals
+   --------------------------------------------------------------------------
+   Every digit in the UI must be a Western/ASCII digit. Forcing `latn` here is
+   a belt-and-braces safeguard on top of the hard-coded `en-US` formatting
+   locales used by lib/domain/format.ts.
+   -------------------------------------------------------------------------- */
+.numeric,
+input[type='number'],
+input[inputmode='numeric'],
+input[inputmode='decimal'],
+table,
+time,
+output,
+.timer {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Numeric fields must stay LTR even inside an RTL form. */
+input[type='number'],
+input[inputmode='numeric'],
+input[inputmode='decimal'] {
+  text-align: end;
+}
+
+/* Hebrew/Arabic/English free text is never forced in either direction: the
+   browser's bidi algorithm handles mixed input correctly inside these fields. */
+.input-free-text {
+  unicode-bidi: plaintext;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* Visible, high-contrast focus ring — essential with gloved hands on a
+     factory floor, and a WCAG requirement. */
+  :focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: #bfdbfe;
+    color: #172554;
+  }
+}
+
+@layer components {
+  /* ------------------------------------------------------------ surfaces */
+  .card {
+    @apply rounded-2xl border border-surface-line bg-white shadow-card;
+  }
+
+  .card-pad {
+    @apply p-5 sm:p-6;
+  }
+
+  .card-muted {
+    @apply rounded-2xl border border-surface-line bg-surface-muted;
+  }
+
+  .divider {
+    @apply border-t border-surface-line;
+  }
+
+  /* ------------------------------------------------------------ controls */
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-xl border px-4 py-2.5
+           text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed
+           disabled:opacity-45;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3.5 text-base;
+  }
+
+  .btn-xl {
+    @apply gap-3 rounded-2xl px-8 py-5 text-lg;
+  }
+
+  .btn-primary {
+    @apply border-brand-600 bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+  }
+
+  .btn-live {
+    @apply border-live-600 bg-live-600 text-white hover:bg-live-700 active:bg-live-700;
+  }
+
+  .btn-safety {
+    @apply border-safety-500 bg-safety-500 text-white hover:bg-safety-600 active:bg-safety-700;
+  }
+
+  .btn-danger {
+    @apply border-danger-500 bg-danger-500 text-white hover:bg-danger-600 active:bg-danger-700;
+  }
+
+  .btn-ghost {
+    @apply border-surface-line bg-white text-ink-soft hover:bg-surface-muted active:bg-surface-sunken;
+  }
+
+  .btn-subtle {
+    @apply border-transparent bg-surface-muted text-ink-soft hover:bg-surface-sunken;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-surface-line bg-white px-3.5 py-2.5 text-sm text-ink
+           placeholder:text-ink-faint focus:border-brand-500 focus:outline-none
+           focus:ring-2 focus:ring-brand-200 disabled:bg-surface-muted;
+  }
+
+  .input-lg {
+    @apply px-4 py-3.5 text-base;
+  }
+
+  .select {
+    @apply input appearance-none bg-white ps-3.5 pe-9;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2364748b'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left 0.75rem center;
+    background-size: 1.1rem;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-ink-soft;
+  }
+
+  .hint {
+    @apply mt-1 block text-xs text-ink-muted;
+  }
+
+  /* --------------------------------------------------------------- badges */
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold;
+  }
+
+  .badge-live {
+    @apply border-live-200 bg-live-50 text-live-700;
+  }
+
+  .badge-paused {
+    @apply border-safety-200 bg-safety-50 text-safety-700;
+  }
+
+  .badge-brand {
+    @apply border-brand-200 bg-brand-50 text-brand-700;
+  }
+
+  .badge-neutral {
+    @apply border-surface-line bg-surface-muted text-ink-muted;
+  }
+
+  .badge-danger {
+    @apply border-danger-100 bg-danger-50 text-danger-700;
+  }
+
+  /* --------------------------------------------------------------- tables */
+  .table-wrap {
+    @apply w-full overflow-x-auto rounded-2xl border border-surface-line bg-white;
+  }
+
+  .table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .table thead th {
+    @apply sticky top-0 z-10 border-b border-surface-line bg-surface-muted px-3.5 py-3
+           text-start text-xs font-bold uppercase tracking-wide text-ink-muted;
+  }
+
+  .table tbody td {
+    @apply border-b border-surface-line/70 px-3.5 py-3 text-start align-middle;
+  }
+
+  .table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .table tbody tr:hover {
+    @apply bg-brand-50/40;
+  }
+
+  /* ------------------------------------------------------------ big digits */
+  .timer-display {
+    @apply numeric font-black leading-none tracking-tight;
+    font-size: clamp(2.5rem, 5.5vw, 4.75rem);
+  }
+
+  .stat-value {
+    @apply numeric text-3xl font-black leading-none text-ink sm:text-4xl;
+  }
+
+  .stat-label {
+    @apply text-xs font-bold uppercase tracking-wide text-ink-muted;
+  }
+}
+
+@layer utilities {
+  /* Horizontal scrollbar that stays usable on a touch tablet. */
+  .scroll-thin::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+  }
+
+  .scroll-thin::-webkit-scrollbar-thumb {
+    background: #c3cddb;
+    border-radius: 999px;
+  }
+
+  .scroll-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Rotates a 180° chevron so it always points "forward" in RTL. */
+  .flip-rtl {
+    transform: scaleX(-1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   TV Mode
+   -------------------------------------------------------------------------- */
+.tv-stage {
+  background:
+    radial-gradient(1200px 620px at 78% -10%, #dbeafe 0%, rgba(219, 234, 254, 0) 62%),
+    radial-gradient(900px 520px at 12% 108%, #d1fae5 0%, rgba(209, 250, 229, 0) 58%),
+    #f8fafc;
+}
+
+.tv-grid {
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.055) 1px, transparent 1px);
+  background-size: 46px 46px;
+}
+
+@keyframes tv-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.tv-progress {
+  transform-origin: inline-start;
+  animation: tv-progress linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Print — the history ledger and reports are printed for shift handover.
+   -------------------------------------------------------------------------- */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .card,
+  .table-wrap {
+    box-shadow: none;
+    border-color: #cbd5e1;
+  }
+}
