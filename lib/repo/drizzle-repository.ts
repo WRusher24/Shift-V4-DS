@@ -652,11 +652,11 @@ export class DrizzleRepository implements Repository {
    */
   async setPrimaryRace(id: string): Promise<Race | null> {
     try {
-      await getDb().execute(sql`
-        UPDATE ${races}
-           SET ${races.isPrimary} = (${races.id} = ${id}::uuid)
-         WHERE ${races.isPrimary} = true OR ${races.id} = ${id}::uuid
-      `);
+      const db = getDb();
+      await db.transaction(async (tx) => {
+        await tx.update(races).set({ isPrimary: false });
+        await tx.update(races).set({ isPrimary: true }).where(eq(races.id, id));
+      });
       return this.getRaceById(id);
     } catch (error) {
       translateError(error, 'Failed to set the primary race');
