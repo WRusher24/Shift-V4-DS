@@ -645,18 +645,16 @@ export class DrizzleRepository implements Repository {
     return rows.map(toRace);
   }
 
- /**
-   * Promotes one race to primary and demotes every other in a transaction.
+/**
+   * Promotes one race to primary and demotes every other using `db.batch()`.
    */
-async setPrimaryRace(id: string): Promise<Race | null> {
+  async setPrimaryRace(id: string): Promise<Race | null> {
     try {
       const db = getDb();
-      // 1. Demote all races first (safe because 0 active primaries satisfies the unique index)
-      await db.update(races).set({ isPrimary: false });
-      
-      // 2. Promote the target race
-      await db.update(races).set({ isPrimary: true }).where(eq(races.id, id));
-      
+      await db.batch([
+        db.update(races).set({ isPrimary: false }),
+        db.update(races).set({ isPrimary: true }).where(eq(races.id, id)),
+      ]);
       return this.getRaceById(id);
     } catch (error) {
       translateError(error, 'Failed to set the primary race');
