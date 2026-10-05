@@ -12,7 +12,6 @@
  */
 
 import type { Repository } from '@/lib/repo/types';
-import { LocalRepository } from '@/lib/repo/local-repository';
 import { DrizzleRepository } from '@/lib/repo/drizzle-repository';
 import { isDatabaseConfigured } from '@/lib/db';
 
@@ -35,13 +34,18 @@ export function getRepository(): Repository {
     return globals.__shiftRepo;
   }
 
-  const repository: Repository = kind === 'local' ? new LocalRepository() : new DrizzleRepository();
+  let repository: Repository;
 
   if (kind === 'local') {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { LocalRepository } = require('@/lib/repo/local-repository');
+    repository = new LocalRepository();
     console.warn(
       '[shift] Running on the local JSON store. This is intended for development and demos — ' +
         'set DATABASE_URL to use Neon PostgreSQL.',
     );
+  } else {
+    repository = new DrizzleRepository();
   }
 
   globals.__shiftRepo = repository;
